@@ -3,9 +3,10 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import ClockCycles, RisingEdge 
 import hashlib
 import random
+import sys
 
 # List of predefined words
 words = [
@@ -100,7 +101,7 @@ def pad_message(message):
     padded_message += message_len_bits.to_bytes(8, byteorder='big')
 
     return padded_message
-    
+
 def int_to_6bit_string(value):
     if value < 0 or value > 63:
         raise ValueError("Value must be between 0 and 63 inclusive for 6-bit representation.")
@@ -121,6 +122,7 @@ def concatenate_bits(two_bits, six_bits):
     
     # Convert the concatenated binary string to an integer
     return int(eight_bit_str, 2)
+
 # Process a single 512-bit block
 def process_block(block):
     w = [0] * 64
@@ -167,64 +169,99 @@ async def test_project(dut):
     dut._log.info("Start")
     num_paragraphs = 1  # Change this to generate more or fewer paragraphs
     num_sentences_per_paragraph = 10  # Change this to control the length of each paragraph
-    message = generate_random_paragraphs(num_paragraphs, num_sentences_per_paragraph)
-    padded_message = pad_message(message)
-    exp_sha_output = sha256(message)
+    num_tests = 2 
 
-    # Split the padded message into 512-bit (64-byte) chunks
-    chunks = [padded_message[i:i+64] for i in range(0, len(padded_message), 64)]
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
-    cocotb.start_soon(clock.start())
-
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
-    dut._log.info("Test project behavior")
+    global H 
     
+    for test in range(num_tests):
+        print("Test No : ", test)
+        H[0] = 0x6a09e667
+        H[1] = 0xbb67ae85 
+        H[2] = 0x3c6ef372
+        H[3] = 0xa54ff53a
+        H[4] = 0x510e527f
+        H[5] = 0x9b05688c
+        H[6] = 0x1f83d9ab
+        H[7] = 0x5be0cd19
+        message = generate_random_paragraphs(num_paragraphs, num_sentences_per_paragraph)
+        #message = "Hello World"
+        padded_message = pad_message(message)
+        exp_sha_output = sha256(message)
 
-    # Print each 512-bit input chunk
-    for i, chunk in enumerate(chunks):
-        #print(f"Chunk {i+1} (512 bits): {chunk.hex()}")
-        #print(f"{chunk[0]}")
-        for j, chun in enumerate(chunk):
-            await ClockCycles(dut.clk, 10)
-            dut.uio_in.value[7] = 0x0
-            dut.uio_in.value[6] = 0x1
-            addr = 63 - j
-            data = chun[addr] 
-            dut.uio_in.value[5:0] = j
-            dut.ui_in.value = data
-            await ClockCycles(dut.clk, 10)
-        dut.uio_in.value[6] = 0x0 
-        dut.uio_in.value[5:0] = 0x0
-        await ClockCycles(dut.clk, 10)    
-        while not dut.uio_out.value[7] :
-            await ClockCycles(dut.clk, 10)
-        
-    
-    hash_out = []
-    for k in range(32):
-        dut.uio_in.value[4:0] = k
-        hash_out.append(dut.uo_out.value.integer)
+        # Split the padded message into 512-bit (64-byte) chunks
+        chunks = [padded_message[i:i+64] for i in range(0, len(padded_message), 64)]
+
+        # Set the clock period to 10 us (100 KHz)
+        clock = Clock(dut.clk, 10, units="us")
+        cocotb.start_soon(clock.start())
+        #print("Input message:",chunks)
+        #print("Length of chunk :",len(chunks))
+        #print("Input message in hex : " , {padded_message.hex()} )
+        #print("Expected SHA OUTPUT:",exp_sha_output)
+
+        # Reset
+        dut._log.info("Reset")
+        dut.ena.value = 1
+        dut.ui_in.value = 0
+        dut.uio_in.value = 0
+        dut.rst_n.value = 0
         await ClockCycles(dut.clk, 10)
-    # Set the input values you want to test
-    #dut.ui_in.value = 20
-    #dut.uio_in.value = 30
-    hash_out_str = ''.join(f'{byte:02x}' for byte in hash_out)
+        dut.rst_n.value = 1
+        await ClockCycles(dut.clk, 10)
+        dut._log.info("Test project behavior")
+        
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+        # Print each 512-bit input chunk
+        for i, chunk in enumerate(chunks):
+            #print(f"Chunk {i+1} (512 bits): {chunk.hex()}")
+            #print(f"{chunk[0]}")
+            #chunk_chunk = [chunk[j:j+8] for j in range(0,len(chunk),8)]
+            chunk_chunk = list()
+            for k in range(64):
+                chunk_chunk.append(chunk[63-k])
+            for j, chun in enumerate(chunk_chunk):
+                #print(f"Chunk {j + 1} : {chun}")
+                #await ClockCycles(dut.clk, 10)
+                #dut.uio_in.value[7] = 0x0
+                #dut.uio_in.value[6] = 0x1
+                addr = j
+                data = chun 
+                dummy = concatenate_bits(1,j)
+                dut.uio_in.value = dummy
+                dut.ui_in.value = data
+                await ClockCycles(dut.clk, 1)
+            #print("One 512 chunk completed")
+            dut.uio_in.value = 0x0 
+            await ClockCycles(dut.clk, 1)
+            while True :
+                await RisingEdge(dut.clk)
+                if (dut.uio_out.value.integer == 0x80):
+                    break
+            
+        #print("Completed the hash")
+        dummy = concatenate_bits(0,31)
+        dut.uio_in.value = dummy
+        await RisingEdge(dut.clk)
+        hash_out = list()
+        for k in range(31):
+            dummy = concatenate_bits(0,30-k)
+            dut.uio_in.value = dummy
+            await RisingEdge(dut.clk)
+            #await RisingEdge(dut.clk)
+            hash_out.append(dut.uo_out.value.integer)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert hash_out_str == exp_sha_output
+        await RisingEdge(dut.clk)
+        hash_out.append(dut.uo_out.value.integer)
 
-    # Keep testing the module by changing the input values, waiting for
+        hash_out_str = ''.join(f'{byte:02x}' for byte in hash_out)
+
+        # Wait for one clock cycle to see the output values
+        await ClockCycles(dut.clk, 1)
+
+        # The following assersion is just an example of how to check the output values.
+        # Change it to match the actual expected output of your module:
+        assert hash_out_str == exp_sha_output
+
+        # Keep testing the module by changing the input values, waiting for
     # one or more clock cycles, and asserting the expected output values.
