@@ -1,6 +1,6 @@
 // This is the 8-bit wrapper architecture for sha 256 algo
 
-module wrapper_8bit_sha_256 (
+module tt_um_wrapper_8bit_sha_256 (
   input  logic [7:0] ui_in,    // Dedicated inputs
   output logic [7:0] uo_out,   // Dedicated outputs
   input  logic [7:0] uio_in,   // IOs: Input path
