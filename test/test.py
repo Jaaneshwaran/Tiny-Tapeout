@@ -100,7 +100,27 @@ def pad_message(message):
     padded_message += message_len_bits.to_bytes(8, byteorder='big')
 
     return padded_message
+    
+def int_to_6bit_string(value):
+    if value < 0 or value > 63:
+        raise ValueError("Value must be between 0 and 63 inclusive for 6-bit representation.")
+    return f"{value:06b}"
 
+def concatenate_bits(two_bits, six_bits):
+    if two_bits < 0 or two_bits > 3:
+        raise ValueError("Two-bit value must be between 0 and 3 inclusive.")
+    if six_bits < 0 or six_bits > 63:
+        raise ValueError("Six-bit value must be between 0 and 63 inclusive.")
+    
+    # Convert to binary strings
+    two_bit_str = f"{two_bits:02b}"
+    six_bit_str = f"{six_bits:06b}"
+    
+    # Concatenate the binary strings
+    eight_bit_str = two_bit_str + six_bit_str
+    
+    # Convert the concatenated binary string to an integer
+    return int(eight_bit_str, 2)
 # Process a single 512-bit block
 def process_block(block):
     w = [0] * 64
