@@ -5,7 +5,16 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = adder_32bit.sv , adder_cum_module.sv , choose_maj_func.sv , controller.sv , k_value_look_up_table.sv , sha_256_top_module.sv , sigma_funcs.sv , stage_1.sv , stage_2.sv , wrapper_top.sv 
+PROJECT_SOURCES +=  k_value_look_up_table.sv 
+PROJECT_SOURCES += adder_32bit.sv 
+PROJECT_SOURCES += adder_cum_module.sv 
+PROJECT_SOURCES +=  choose_maj_func.sv 
+PROJECT_SOURCES +=  sigma_funcs.sv 
+PROJECT_SOURCES +=  controller.sv 
+PROJECT_SOURCES +=  stage_1.sv 
+PROJECT_SOURCES +=  stage_2.sv 
+PROJECT_SOURCES +=  sha_256_top_module.sv 
+PROJECT_SOURCES +=  wrapper_top.sv 
 
 ifneq ($(GATES),yes)
 
@@ -32,7 +41,7 @@ VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
 endif
 
 # Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v
+VERILOG_SOURCES += $(PWD)/tb.sv
 TOPLEVEL = tb
 
 # MODULE is the basename of the Python test file
