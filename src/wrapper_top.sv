@@ -128,45 +128,48 @@ module wrapper_8bit_sha_256 (
 
   //assign uo_out = (hash_read_allowed == 1'b1) ? output_sha_message[msb_pos : lsb_pos] : 8'h0 ;
 
-  always_comb begin
-     if(hash_read_allowed == 1'b1)begin
+  always@(posedge clk or negedge rst_n) begin
+     if(rst_n == 1'b0)begin
+	      uo_out <= 8'h0 ;
+     end 
+     else if(hash_read_allowed == 1'b1)begin
      case (uio_in[4:0])
-           6'd0:   uo_out = output_sha_message[7:0];
-           6'd1:   uo_out = output_sha_message[15:8];
-           6'd2:   uo_out = output_sha_message[23:16] ;
-           6'd3:   uo_out = output_sha_message[31:24] ;
-           6'd4:   uo_out = output_sha_message[39:32] ;
-           6'd5:   uo_out = output_sha_message[47:40] ;
-           6'd6:   uo_out = output_sha_message[55:48] ;
-           6'd7:   uo_out = output_sha_message[63:56] ;
-           6'd8:   uo_out = output_sha_message[71:64] ;
-           6'd9:   uo_out = output_sha_message[79:72] ;
-           6'd10:  uo_out = output_sha_message[87:80] ;
-           6'd11:  uo_out = output_sha_message[95:88] ;
-           6'd12:  uo_out = output_sha_message[103:96] ;
-           6'd13:  uo_out = output_sha_message[111:104] ;
-           6'd14:  uo_out = output_sha_message[119:112] ;
-           6'd15:  uo_out = output_sha_message[127:120] ;
-           6'd16:  uo_out = output_sha_message[135:128] ;
-           6'd17:  uo_out = output_sha_message[143:136] ;
-           6'd18:  uo_out = output_sha_message[151:144] ;
-           6'd19:  uo_out = output_sha_message[159:152] ;
-           6'd20:  uo_out = output_sha_message[167:160] ;
-           6'd21:  uo_out = output_sha_message[175:168];
-           6'd22:  uo_out = output_sha_message[183:176] ;
-           6'd23:  uo_out = output_sha_message[191:184] ;
-           6'd24:  uo_out = output_sha_message[199:192] ;
-           6'd25:  uo_out = output_sha_message[207:200] ;
-           6'd26:  uo_out = output_sha_message[215:208] ;
-           6'd27:  uo_out = output_sha_message[223:216] ;
-           6'd28:  uo_out = output_sha_message[231:224] ;
-           6'd29:  uo_out = output_sha_message[239:232] ;
-           6'd30:  uo_out = output_sha_message[247:240] ;
-           6'd31:  uo_out = output_sha_message[255:248] ;           
-           default: uo_out = 8'b0; // Default case to avoid latches
+           6'd0:   uo_out <= output_sha_message[7:0];
+           6'd1:   uo_out <= output_sha_message[15:8];
+           6'd2:   uo_out <= output_sha_message[23:16] ;
+           6'd3:   uo_out <= output_sha_message[31:24] ;
+           6'd4:   uo_out <= output_sha_message[39:32] ;
+           6'd5:   uo_out <= output_sha_message[47:40] ;
+           6'd6:   uo_out <= output_sha_message[55:48] ;
+           6'd7:   uo_out <= output_sha_message[63:56] ;
+           6'd8:   uo_out <= output_sha_message[71:64] ;
+           6'd9:   uo_out <= output_sha_message[79:72] ;
+           6'd10:  uo_out <= output_sha_message[87:80] ;
+           6'd11:  uo_out <= output_sha_message[95:88] ;
+           6'd12:  uo_out <= output_sha_message[103:96] ;
+           6'd13:  uo_out <= output_sha_message[111:104] ;
+           6'd14:  uo_out <= output_sha_message[119:112] ;
+           6'd15:  uo_out <= output_sha_message[127:120] ;
+           6'd16:  uo_out <= output_sha_message[135:128] ;
+           6'd17:  uo_out <= output_sha_message[143:136] ;
+           6'd18:  uo_out <= output_sha_message[151:144] ;
+           6'd19:  uo_out <= output_sha_message[159:152] ;
+           6'd20:  uo_out <= output_sha_message[167:160] ;
+           6'd21:  uo_out <= output_sha_message[175:168];
+           6'd22:  uo_out <= output_sha_message[183:176] ;
+           6'd23:  uo_out <= output_sha_message[191:184] ;
+           6'd24:  uo_out <= output_sha_message[199:192] ;
+           6'd25:  uo_out <= output_sha_message[207:200] ;
+           6'd26:  uo_out <= output_sha_message[215:208] ;
+           6'd27:  uo_out <= output_sha_message[223:216] ;
+           6'd28:  uo_out <= output_sha_message[231:224] ;
+           6'd29:  uo_out <= output_sha_message[239:232] ;
+           6'd30:  uo_out <= output_sha_message[247:240] ;
+           6'd31:  uo_out <= output_sha_message[255:248] ;           
+           default: uo_out <= 8'b0; // Default case to avoid latches
      endcase
      end else begin
-       uo_out = 8'h0 ;
+       uo_out <= 8'h0 ;
      end
   end
 
