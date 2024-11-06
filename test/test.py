@@ -3,7 +3,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge 
+from cocotb.triggers import ClockCycles, RisingEdge
 import hashlib
 import random
 import sys
@@ -112,14 +112,14 @@ def concatenate_bits(two_bits, six_bits):
         raise ValueError("Two-bit value must be between 0 and 3 inclusive.")
     if six_bits < 0 or six_bits > 63:
         raise ValueError("Six-bit value must be between 0 and 63 inclusive.")
-    
+
     # Convert to binary strings
     two_bit_str = f"{two_bits:02b}"
     six_bit_str = f"{six_bits:06b}"
-    
+
     # Concatenate the binary strings
     eight_bit_str = two_bit_str + six_bit_str
-    
+
     # Convert the concatenated binary string to an integer
     return int(eight_bit_str, 2)
 
@@ -167,17 +167,17 @@ def sha256(message):
 @cocotb.test()
 async def test_project(dut):
     dut._log.info("Start")
-    num_paragraphs = 1  # Change this to generate more or fewer paragraphs
+    num_paragraphs = 4  # Change this to generate more or fewer paragraphs
     num_sentences_per_paragraph = 10  # Change this to control the length of each paragraph
-    num_tests = 2 
+    num_tests = 10
 
 
-    global H 
-    
+    global H
+
     for test in range(num_tests):
         print("Test No : ", test)
         H[0] = 0x6a09e667
-        H[1] = 0xbb67ae85 
+        H[1] = 0xbb67ae85
         H[2] = 0x3c6ef372
         H[3] = 0xa54ff53a
         H[4] = 0x510e527f
@@ -210,49 +210,53 @@ async def test_project(dut):
         dut.rst_n.value = 1
         await ClockCycles(dut.clk, 10)
         dut._log.info("Test project behavior")
-        
+
 
         # Print each 512-bit input chunk
         for i, chunk in enumerate(chunks):
             #print(f"Chunk {i+1} (512 bits): {chunk.hex()}")
             #print(f"{chunk[0]}")
             #chunk_chunk = [chunk[j:j+8] for j in range(0,len(chunk),8)]
-            chunk_chunk = list()
-            for k in range(64):
-                chunk_chunk.append(chunk[63-k])
-            for j, chun in enumerate(chunk_chunk):
+            #chunk_chunk = list()
+            #for k in range(64):
+                #chunk_chunk.append(chunk[63-k])
+                #chunk_chunk.append(chunk[k])
+            for j, chun in enumerate(chunk):
                 #print(f"Chunk {j + 1} : {chun}")
                 #await ClockCycles(dut.clk, 10)
                 #dut.uio_in.value[7] = 0x0
                 #dut.uio_in.value[6] = 0x1
                 addr = j
-                data = chun 
-                dummy = concatenate_bits(1,j)
+                data = chun
+                if j == 63 :
+                    dummy = concatenate_bits(0,3)
+                else :
+                    dummy = concatenate_bits(0,1)
                 dut.uio_in.value = dummy
                 dut.ui_in.value = data
                 await ClockCycles(dut.clk, 1)
             #print("One 512 chunk completed")
-            dut.uio_in.value = 0x0 
+            dut.uio_in.value = 0x0
             await ClockCycles(dut.clk, 1)
             while True :
                 await RisingEdge(dut.clk)
                 if (dut.uio_out.value.integer == 0x80):
                     break
-            
-        #print("Completed the hash")
-        dummy = concatenate_bits(0,31)
-        dut.uio_in.value = dummy
-        await RisingEdge(dut.clk)
+
+        print("Completed the hash")
+        dummy = concatenate_bits(0,4)
+        ##dut.uio_in.value = dummy
+        #await RisingEdge(dut.clk)
         hash_out = list()
-        for k in range(31):
-            dummy = concatenate_bits(0,30-k)
+        for k in range(32):
+            #dummy = concatenate_bits(0,4)
             dut.uio_in.value = dummy
             await RisingEdge(dut.clk)
             #await RisingEdge(dut.clk)
             hash_out.append(dut.uo_out.value.integer)
 
-        await RisingEdge(dut.clk)
-        hash_out.append(dut.uo_out.value.integer)
+        #await RisingEdge(dut.clk)
+        #hash_out.append(dut.uo_out.value.integer)
 
         hash_out_str = ''.join(f'{byte:02x}' for byte in hash_out)
 
@@ -262,6 +266,9 @@ async def test_project(dut):
         # The following assersion is just an example of how to check the output values.
         # Change it to match the actual expected output of your module:
         assert hash_out_str == exp_sha_output
+
+        if(hash_out_str == exp_sha_output) :
+            print("Test {0} passed".format(test))
 
         # Keep testing the module by changing the input values, waiting for
     # one or more clock cycles, and asserting the expected output values.
