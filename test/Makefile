@@ -13,8 +13,8 @@ PROJECT_SOURCES +=  sigma_funcs.sv
 PROJECT_SOURCES +=  controller.sv 
 PROJECT_SOURCES +=  stage_1.sv 
 PROJECT_SOURCES +=  stage_2.sv 
-PROJECT_SOURCES +=  sha_256_top_module.sv 
-PROJECT_SOURCES +=  wrapper_top.sv 
+PROJECT_SOURCES +=  tt_sha_256_top_module.sv 
+PROJECT_SOURCES +=  tt_wrapper.sv 
 
 ifneq ($(GATES),yes)
 
