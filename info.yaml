@@ -5,10 +5,10 @@ project:
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Implements SHA-256 hashing algorithm"      # One line description of what your project does
   language:     "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     200000000       # Clock frequency in Hz (or 0 if not applicable)
+  clock_hz:     100000000       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "6x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  tiles: "4x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
   top_module:  "tt_um_wrapper_8bit_sha_256"
@@ -22,11 +22,11 @@ project:
     - "choose_maj_func.sv"
     - "controller.sv"
     - "k_value_look_up_table.sv"
-    - "sha_256_top_module.sv"  
+    - "tt_sha_256_top_module.sv"  
     - "sigma_funcs.sv"
     - "stage_1.sv"
     - "stage_2.sv"
-    - "wrapper_top.sv"
+    - "tt_wrapper.sv"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
