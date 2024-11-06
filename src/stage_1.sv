@@ -3,7 +3,8 @@
 module stage1_sha (
   input logic clk ,
   input logic rstn ,
-  input logic [511:0] input_msg_digest ,
+  //input logic [511:0] input_msg_digest ,
+  input logic [7:0] input_msg_digest ,
   input logic start ,
   input logic sha_running ,
   input logic [5:0] state_counter ,
@@ -31,7 +32,7 @@ module stage1_sha (
        w_fifo <= 512'h0 ;
     end else begin
        if(start == 1'b1) begin
-          w_fifo <= input_msg_digest ;
+          w_fifo <= {w_fifo[503:0] , input_msg_digest} ;
        end else if (sha_running == 1'b1)begin
           w_fifo <= {w_fifo[479 : 0], next_w_word} ;
        end

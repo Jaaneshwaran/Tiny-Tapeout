@@ -7,7 +7,7 @@ module param_k_look_up_table (
 
  logic [31:0] k_value_c ;
 
- always_comb begin
+ always@(*) begin
      case(look_up_addr)
      6'd0:  k_value_c = 32'h428a2f98;
       6'd1:  k_value_c = 32'h71374491;
